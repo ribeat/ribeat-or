@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">Ribeat Orders</string>
+    <string name="title_item_detail">Item Detail</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="category_image">Category Image</string>
+    <string name="lorem">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut sed lorem eget dolor malesuada
+        molestie. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Praesent
+        consequat eros in elit viverra, malesuada placerat leo ultricies.
+    </string>
+    <string name="placeholder">Placeholder</string>
+    <string name="price_placeholder">12 lei</string>
+    <string name="order">Order</string>
+    <string name="plus_button">Plus Button</string>
+    <string name="minus_button">Minus Button</string>
+    <string name="lei" formatted="false">%.2f%n lei</string>
+</resources>
