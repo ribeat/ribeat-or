@@ -14,5 +14,11 @@
     <string name="order">Order</string>
     <string name="plus_button">Plus Button</string>
     <string name="minus_button">Minus Button</string>
-    <string name="lei" formatted="false">%.2f%n lei</string>
+    <string name="lei" formatted="false">%.2f lei</string>
+    <string name="cart">Cart</string>
+    <string name="shop_icon">Shop Icon</string>
+    <string name="total">Total:</string>
+    <string name="delete_button">Delete Button</string>
+    <string name="ribeat">Ribeat</string>
+    <string name="send_order">Send Order</string>
 </resources>

@@ -4,8 +4,6 @@
               xmlns:tools="http://schemas.android.com/tools"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
-              android:layout_marginLeft="16dp"
-              android:layout_marginRight="16dp"
               android:baselineAligned="false"
               android:divider="?android:attr/dividerHorizontal"
               android:orientation="horizontal"
@@ -26,12 +24,14 @@
                                                android:layout_height="match_parent"
                                                app:layoutManager="LinearLayoutManager"
                                                tools:context="com.fun.monkeys.ribeat.or.MainActivity"
-                                               tools:listitem="@layout/category_list_content"/>
+                                               tools:listitem="@layout/category_list_content"
+                                               android:background="@android:color/white"/>
 
     <FrameLayout
             android:id="@+id/item_detail_container"
             android:layout_width="0dp"
             android:layout_height="match_parent"
+            android:background="@drawable/detail_background"
             android:layout_weight="3"/>
 
 </LinearLayout>

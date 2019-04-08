@@ -1,5 +1,6 @@
 package com.`fun`.monkeys.ribeat.or
 
+import android.content.Context
 import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -17,8 +18,11 @@ import kotlinx.android.synthetic.main.category_list.view.*
 import kotlinx.android.synthetic.main.category_list_content.view.*
 
 import android.graphics.Rect
+import android.net.Uri
 import android.util.Base64
 import android.widget.ImageView
+import androidx.navigation.fragment.NavHostFragment
+import kotlinx.android.synthetic.main.activity_main.*
 
 
 /**
@@ -35,8 +39,25 @@ class CategoryListFragment : Fragment() {
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
      * device.
      */
+
+    private var item: Category? = null
     private var twoPane: Boolean = false
     private var compositeDisposable = CompositeDisposable()
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        arguments?.let {
+            if (it.containsKey(CategoryListFragment.ARG_ITEM_ID)) {
+                // Load the dummy content specified by the fragment
+                // arguments. In a real-world scenario, use a Loader
+                // to load content from a content provider.
+                item = Category.Manager[it.getString(CategoryListFragment.ARG_ITEM_ID)?.toInt()!!]
+                toolbar?.title = item?.name
+            }
+        }
+
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -57,24 +78,22 @@ class CategoryListFragment : Fragment() {
             rootView.item_list.addItemDecoration(GridSpacingItemDecoration(2, 32, false))
         } else {
 
-            rootView.item_list.addItemDecoration(GridSpacingItemDecoration(1, 48, true))
+            rootView.item_list.addItemDecoration(GridSpacingItemDecoration(1, 24, true))
         }
         setupRecyclerView(rootView.item_list)
+        if(item == null) item = (context as MainActivity).lastCategory
+        if (item != null && twoPane) goToDetail(item!!, false)
         return rootView
     }
 
     private fun setupRecyclerView(recyclerView: RecyclerView) {
         if (recyclerView.adapter == null) {
             recyclerView.adapter = SimpleItemRecyclerViewAdapter(
-                this,
-                Category.Manager.items.sortedBy { it.name },
-                twoPane
+                Category.Manager.items.sortedBy { it.name }
             )
         } else {
             recyclerView.swapAdapter(SimpleItemRecyclerViewAdapter(
-                this,
-                Category.Manager.items.sortedBy { it.name },
-                twoPane
+                Category.Manager.items.sortedBy { it.name }
             ), false)
         }
 
@@ -82,9 +101,7 @@ class CategoryListFragment : Fragment() {
             Category.Manager.fetchItems().subscribe { items ->
                 recyclerView.swapAdapter(
                     SimpleItemRecyclerViewAdapter(
-                        this,
-                        items.sortedBy { it.name },
-                        twoPane
+                        items.sortedBy { it.name }
                     ), false
                 )
             }.addTo(compositeDisposable)
@@ -94,6 +111,20 @@ class CategoryListFragment : Fragment() {
     override fun onDestroy() {
         super.onDestroy()
         compositeDisposable.dispose()
+    }
+
+    private lateinit var listener: OnFragmentInteractionListener
+
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+
+        try {
+            listener = context as OnFragmentInteractionListener
+        } catch (e: ClassCastException) {
+            throw ClassCastException(context.toString() + " must implement OnItemSelectListener")
+        }
+
     }
 
     inner class GridSpacingItemDecoration(
@@ -125,10 +156,29 @@ class CategoryListFragment : Fragment() {
         }
     }
 
+    fun goToDetail(item: Category, animation: Boolean = true) {
+        if (twoPane) {
+            val fragment = CategoryDetailFragment().apply {
+                arguments = Bundle().apply {
+                    putInt(CategoryDetailFragment.ARG_ITEM_ID, item.id)
+                }
+            }
+            fragmentManager
+                ?.beginTransaction()
+                ?.apply { if(animation) setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_left) }
+                ?.replace(R.id.item_detail_container, fragment)
+                ?.addToBackStack(null)
+                ?.commit()
+        } else {
+
+            NavHostFragment.findNavController(this).navigate(R.id.action_categoryListFragment_to_categoryDetailFragment, Bundle().apply {
+                putInt(CategoryDetailFragment.ARG_ITEM_ID, item.id)
+            })
+        }
+    }
+
     inner class SimpleItemRecyclerViewAdapter(
-        private val parentFragment: CategoryListFragment,
-        var values: List<Category>,
-        private val twoPane: Boolean
+        var values: List<Category>
     ) :
         RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder>() {
 
@@ -137,28 +187,7 @@ class CategoryListFragment : Fragment() {
         init {
             onClickListener = View.OnClickListener { v ->
                 val item = v.tag as Category
-                if (twoPane) {
-                    val fragment = CategoryDetailFragment().apply {
-                        arguments = Bundle().apply {
-                            putInt(CategoryDetailFragment.ARG_ITEM_ID, item.id)
-                        }
-                    }
-                    parentFragment.fragmentManager
-                        ?.beginTransaction()
-                        ?.replace(R.id.item_detail_container, fragment)
-                        ?.commit()
-                } else {
-                    val fragment = CategoryDetailFragment().apply {
-                        arguments = Bundle().apply {
-                            putInt(CategoryDetailFragment.ARG_ITEM_ID, item.id)
-                        }
-                    }
-                    parentFragment.fragmentManager
-                        ?.beginTransaction()
-                        ?.replace(R.id.item_list, fragment)
-                        ?.addToBackStack(null)
-                        ?.commit()
-                }
+                goToDetail(item)
             }
         }
 
@@ -188,5 +217,14 @@ class CategoryListFragment : Fragment() {
             val imageView: ImageView = view.category_image
             val contentView: TextView = view.content
         }
+    }
+
+    interface OnFragmentInteractionListener {
+        // TODO: Update argument type and name
+        fun onFragmentInteraction(uri: Uri)
+    }
+
+    companion object {
+        val ARG_ITEM_ID = "item_id"
     }
 }

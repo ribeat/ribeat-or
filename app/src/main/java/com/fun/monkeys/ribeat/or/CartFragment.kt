@@ -6,85 +6,48 @@ import android.graphics.Rect
 import android.net.Uri
 import android.os.Bundle
 import android.util.Base64
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
-import com.`fun`.monkeys.ribeat.or.data.Category
 import com.`fun`.monkeys.ribeat.or.data.Order
 import com.`fun`.monkeys.ribeat.or.data.Product
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxkotlin.addTo
-import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.cart.view.*
+import kotlinx.android.synthetic.main.cart_item.view.*
 import kotlinx.android.synthetic.main.category_detail.view.*
-import kotlinx.android.synthetic.main.product.view.*
 import kotlin.math.max
 
-/**
- * A fragment representing a single Item detail screen.
- * This fragment is either contained in a [CategoryListFragment]
- * in two-pane mode (on tablets) or a [CategoryDetailMainFragment]
- * on handsets.
- */
-class CategoryDetailFragment : Fragment() {
-
-    /**
-     * The dummy content this fragment is presenting.
-     */
-    private var item: Category? = null
+class CartFragment : Fragment() {
     private var compositeDisposable = CompositeDisposable()
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    var orders = OrderController.INSTANCE.getOrders()
 
-        arguments?.let {
-            if (it.containsKey(ARG_ITEM_ID)) {
-                // Load the dummy content specified by the fragment
-                // arguments. In a real-world scenario, use a Loader
-                // to load content from a content provider.
-                item = Category.Manager[it.getInt(ARG_ITEM_ID)]
-                listener.onItemSelect(item)
-                toolbar?.title = item?.name
-            }
-        }
-    }
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        // Inflate the layout for this fragment
+        val rootView = inflater.inflate(R.layout.cart, container, false)
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
-        val rootView = inflater.inflate(R.layout.category_detail, container, false)
-
-        // Show the dummy content as text in a TextView.
-        item?.let {
-            rootView.item_detail.text = item?.name
-        }
-
-        rootView.product_list.addItemDecoration(GridSpacingItemDecoration(1, 16, false))
-        setupRecyclerView(rootView.product_list)
-
+        rootView.order_list.addItemDecoration(GridSpacingItemDecoration(1, 16, false))
+        setupRecyclerView(rootView.order_list)
         return rootView
+
     }
 
     private fun setupRecyclerView(recyclerView: RecyclerView) {
         if (recyclerView.adapter == null) {
             recyclerView.adapter = SimpleItemRecyclerViewAdapter(
-                Product.Manager.categoryMap[item?.id]?.sortedBy { it.name } ?: listOf()
+                orders
             )
         } else {
             recyclerView.swapAdapter(
                 SimpleItemRecyclerViewAdapter(
-                    Product.Manager.categoryMap[item?.id]?.sortedBy { it.name } ?: listOf()
-                ), false)
-        }
-
-        if (Product.Manager.count == 0) {
-            Product.Manager.fetchItems().subscribe { _ ->
-                recyclerView.swapAdapter(
-                    SimpleItemRecyclerViewAdapter(
-                        Product.Manager.categoryMap[item?.id]?.sortedBy { it.name } ?: listOf()
-                    ), false
-                )
-            }.addTo(compositeDisposable)
+                    orders
+                ), false
+            )
         }
     }
 
@@ -93,25 +56,27 @@ class CategoryDetailFragment : Fragment() {
         compositeDisposable.dispose()
     }
 
-    inner class SimpleItemRecyclerViewAdapter(
-        var values: List<Product>
-    ) : RecyclerView.Adapter<CategoryDetailFragment.SimpleItemRecyclerViewAdapter.ViewHolder>() {
 
+    inner class SimpleItemRecyclerViewAdapter(
+        var values: List<Order>
+    ) : RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder>() {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
             val view = LayoutInflater.from(parent.context)
-                .inflate(R.layout.product, parent, false)
+                .inflate(R.layout.cart_item, parent, false)
             return ViewHolder(view)
         }
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val item = values[position]
-            val decoded = Base64.decode(item.image.toByteArray(), 0)
+            val product = Product.Manager[item.productId]
+            val decoded = Base64.decode(product?.image?.toByteArray(), 0)
             holder.imageView.setImageBitmap(BitmapFactory.decodeByteArray(decoded, 0, decoded.size))
-            holder.priceView.text = getString(R.string.lei, item.price)
-            holder.nameView.text = item.name
-            holder.detailsView.text = item.details
-            holder.orderCount.setText(0.toString())
+            holder.priceView.text = getString(R.string.lei, product?.price)
+            holder.nameView.text = product?.name
+            holder.detailsView.text = product?.details
+            holder.orderTotal.text = getString(R.string.lei, product?.price!! * item.quantity)
+            holder.orderCount.setText(item.quantity.toString())
 
             with(holder.itemView) {
                 tag = item
@@ -129,7 +94,8 @@ class CategoryDetailFragment : Fragment() {
             val plusButton = view.order_plus_button
             val orderCount = view.order_count
             val orderButtton = view.order_button
-            var item: Product? = null
+            val orderTotal = view.order_total
+            val deleteButton = view.order_delete_button
 
             init {
                 minusButton.setOnClickListener {
@@ -140,11 +106,15 @@ class CategoryDetailFragment : Fragment() {
                 }
                 orderButtton.setOnClickListener {
                     val count = orderCount.text.toString().toInt()
-                    if(count > 0) {
-                        OrderController.INSTANCE.addOrder(Order(count, (itemView.tag as Product).id, false))
-                        orderCount.setText(0.toString())
-                    }
+                    val order = itemView.tag as Order
+                    order.quantity = count
 
+                    (if (count == 0) OrderController.INSTANCE::removeOrder else OrderController.INSTANCE::updateOrder)(order)
+                    if (count == 0) orders.remove(order)
+                }
+                deleteButton.setOnClickListener {
+                    OrderController.INSTANCE.removeOrder(itemView.tag as Order)
+                    orders.remove(itemView.tag as Order)
                 }
             }
         }
@@ -179,13 +149,14 @@ class CategoryDetailFragment : Fragment() {
         }
     }
 
-    private lateinit var listener: OnItemSelectListener
+    private lateinit var listener: OnFragmentInteractionListener
 
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
         try {
-            listener = context as OnItemSelectListener
+            listener = context as OnFragmentInteractionListener
+//            listener.onFragmentInteraction()
         } catch (e: ClassCastException) {
             throw ClassCastException(context.toString() + " must implement OnItemSelectListener")
         }
@@ -193,16 +164,8 @@ class CategoryDetailFragment : Fragment() {
     }
 
 
-    companion object {
-        /**
-         * The fragment argument representing the item ID that this fragment
-         * represents.
-         */
-        const val ARG_ITEM_ID = "item_id"
-    }
-
-    interface OnItemSelectListener {
+    interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
-        fun onItemSelect(category: Category?)
+        fun onFragmentInteraction(uri: Uri)
     }
 }

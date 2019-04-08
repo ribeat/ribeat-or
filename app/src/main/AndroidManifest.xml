@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.fun.monkeys.ribeat.or">
+          xmlns:tools="http://schemas.android.com/tools" package="com.fun.monkeys.ribeat.or">
 
     <uses-permission android:name="android.permission.INTERNET"/>
 
@@ -12,7 +12,9 @@
             android:screenOrientation="landscape"
             android:supportsRtl="true"
             android:theme="@style/AppTheme.NoActionBar"
-            android:usesCleartextTraffic="true">
+            android:hardwareAccelerated="true"
+            android:name=".OrderController"
+            android:usesCleartextTraffic="true" tools:ignore="GoogleAppIndexingWarning">
         <activity android:name="com.fun.monkeys.ribeat.or.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>

@@ -9,7 +9,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Product(val id: Int, val details: String, val name: String, val price: Double, val type: String, val vat: Double, val categoryId: Int, val image: String) {
     object Manager : ApiListManager<Product, Int> by ApiListManagerImpl(
-        "http://192.168.86.153:8080/api/v1/products/",
+        "http://192.168.86.188:8080/api/v1/products/",
         Product.serializer(),
         emptyList(),
         {

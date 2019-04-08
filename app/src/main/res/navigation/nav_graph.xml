@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            xmlns:tools="http://schemas.android.com/tools" android:id="@+id/nav_graph"
+            app:startDestination="@id/categoryListFragment">
+
+    <fragment android:id="@+id/categoryListFragment" android:name="com.fun.monkeys.ribeat.or.CategoryListFragment"
+              android:label="category_list" tools:layout="@layout/category_list">
+        <action android:id="@+id/action_categoryListFragment_to_categoryDetailFragment"
+                app:destination="@id/categoryDetailFragment" app:enterAnim="@anim/slide_in_right"
+                app:exitAnim="@anim/slide_out_left" app:popEnterAnim="@anim/slide_in_right"
+                app:popExitAnim="@anim/slide_out_left" app:popUpTo="@+id/categoryListFragment"/>
+        <action android:id="@+id/action_categoryListFragment_to_cartFragment" app:destination="@id/cartFragment"
+                app:popUpTo="@+id/categoryListFragment" app:enterAnim="@anim/slide_in_top"
+                app:exitAnim="@anim/slide_out_bottom" app:popEnterAnim="@anim/slide_in_bottom"
+                app:popExitAnim="@anim/slide_out_top"/>
+        <argument android:name="item_id" app:argType="string" app:nullable="true"/>
+    </fragment>
+    <fragment android:id="@+id/categoryDetailFragment" android:name="com.fun.monkeys.ribeat.or.CategoryDetailFragment"
+              android:label="category_detail" tools:layout="@layout/category_detail">
+        <action android:id="@+id/action_categoryDetailFragment_to_cartFragment" app:destination="@id/cartFragment"
+                app:popUpTo="@+id/categoryDetailFragment" app:enterAnim="@anim/slide_in_top"
+                app:exitAnim="@anim/slide_out_bottom" app:popEnterAnim="@anim/slide_in_bottom"
+                app:popExitAnim="@anim/slide_out_top"/>
+        <argument android:name="item_id" app:argType="integer"/>
+    </fragment>
+    <fragment android:name="com.fun.monkeys.ribeat.or.CartFragment" android:label="cart"
+              tools:layout="@layout/cart" android:id="@+id/cartFragment">
+        <action android:id="@+id/action_cartFragment_to_categoryListFragment"
+                app:destination="@id/categoryListFragment" app:enterAnim="@anim/slide_in_bottom"
+                app:exitAnim="@anim/slide_out_top" app:popEnterAnim="@anim/slide_in_top"
+                app:popExitAnim="@anim/slide_out_bottom"/>
+    </fragment>
+</navigation>
