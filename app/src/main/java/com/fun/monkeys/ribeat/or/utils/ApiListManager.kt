@@ -13,13 +13,18 @@ interface ApiListManager<T, K>: ListManager<T> {
     val itemsMap: Map<K, T>
 
     fun fetchItems(): Single<List<T>> {
-        return apiUrl.httpGet().rxResponseObject(kotlinxDeserializerOf(serializer.list)).map {
+        println("$origin$apiUrl")
+        return "$origin$apiUrl".httpGet().rxResponseObject(kotlinxDeserializerOf(serializer.list)).map {
             items = it
             it
         }
     }
 
     operator fun get(id: K) = itemsMap[id]
+
+    companion object {
+        const val origin = "http://10.3.1.165:8080/"
+    }
 }
 
 class ApiListManagerImpl<T, K>(

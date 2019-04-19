@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Category(val id: Int, val name: String, val deliveryOrder: Int, val image: String) {
-    object Manager : ApiListManager<Category, Int> by ApiListManagerImpl("http://192.168.86.188:8080/api/v1/categories/", Category.serializer(), emptyList(), {
+    object Manager : ApiListManager<Category, Int> by ApiListManagerImpl("api/v1/categories/", Category.serializer(), emptyList(), {
         it.id
     })
 }

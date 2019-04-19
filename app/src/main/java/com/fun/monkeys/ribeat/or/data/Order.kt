@@ -1,5 +1,6 @@
 package com.`fun`.monkeys.ribeat.or.data
 
+import com.`fun`.monkeys.ribeat.or.utils.ApiListManager
 import com.github.kittinunf.fuel.httpPost
 import com.github.kittinunf.fuel.rx.rxResponse
 import io.reactivex.Single
@@ -14,7 +15,7 @@ data class Order(var quantity: Int, var productId: Int, var baypassDeliveryOrder
 
     object Manager {
         fun sendOrders(orders: List<Order>): Single<ByteArray> {
-            return "http://192.168.86.188:8080/api/v1/orders/".httpPost()
+            return "${ApiListManager.origin}api/v1/orders/".httpPost()
                 .body(Json.stringify(OrderPostData.serializer(), OrderPostData(orders, (1 until 9).random().toString())))
                 .rxResponse()
         }

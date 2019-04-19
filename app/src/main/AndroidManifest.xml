@@ -15,7 +15,8 @@
             android:hardwareAccelerated="true"
             android:name=".OrderController"
             android:usesCleartextTraffic="true" tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name="com.fun.monkeys.ribeat.or.MainActivity">
+        <activity android:name="com.fun.monkeys.ribeat.or.MainActivity"
+                  android:screenOrientation="landscape">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
